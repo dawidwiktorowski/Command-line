@@ -2,6 +2,10 @@ package com.company;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,6 +61,10 @@ public class Main {
                     System.out.println("Time           Wyswietla czas.");
                     System.out.println("PAUSE          Zawiesza przetwarzanie pliku wsadowego i wyświetla komunikat.");
                     System.out.println("MKDIR          Tworzy katalog..");
+                    System.out.println("CLS            Czysci konsole");
+                    System.out.println("IPCONFIG       Podaje IP");
+                    System.out.println("GETMAC         Podaje addres MAC");
+                    System.out.println("HOSTNAME       Podaje nazwe hosta");
 
                     break;
                 case "cd..":
@@ -114,6 +122,22 @@ public class Main {
                     System.out.println("Nacisnij klawisz aby kontynuowac ...");
                     klawisz = scanner.nextLine();
                     break;
+/////////////////////////////////////////////////////////////////////////////////
+                //DODATKOWE
+
+
+                case "getmac":
+                    podanieMAC();
+                    break;
+                case "hostname":
+                    nazwaHosta();
+                    break;
+                case "ipconfig":
+                    podanieIP();
+                    break;
+                case "cls":
+                    czysciKonsole();
+                    break;
 
 
                 default:
@@ -137,6 +161,24 @@ public class Main {
     private static String wyswietle(Path path) {
         return path.toAbsolutePath().toString();
     }
+    public static void nazwaHosta() throws UnknownHostException {
+        InetAddress ip;
+        String hostName;
+        try {
+            ip = InetAddress.getLocalHost();
+            hostName = ip.getHostName();
+            System.out.println(hostName);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+    public static void czysciKonsole() {
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
     private static Path podacSciezke(Path sciezkaObecna, String informacje) {
         Path sciezkaTymczasowa = Paths.get(wyswietle(sciezkaObecna) + "\\" + informacje);
@@ -145,6 +187,15 @@ public class Main {
         else
             System.out.println("nie znaleziono katalogu");
         return sciezkaObecna;
+    }
+    public static void podanieIP() throws UnknownHostException {
+        InetAddress ip;
+        try {
+            ip = InetAddress.getLocalHost();
+            System.out.println("Your current IP address is: " + ip.getHostAddress());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
     private static Path getFile(Path sciezkaObecna, String nazwaSciezki) {
@@ -191,5 +242,18 @@ public class Main {
         return sciezkaObecna;
 
 
+    }
+
+    public static void podanieMAC() throws SocketException, UnknownHostException {
+        InetAddress ip;
+        ip = InetAddress.getLocalHost();
+        NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+        byte[] mac = network.getHardwareAddress();
+        System.out.print("Your current MAC address is: ");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        System.out.println(sb.toString());
     }
 }
